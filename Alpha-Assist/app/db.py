@@ -273,12 +273,15 @@ def list_tasks(
     return q.execute().data or []
 
 
-def list_active_tasks(user_id: str, limit: int = 25) -> list[dict]:
+def list_recent_tasks(user_id: str, limit: int = 30) -> list[dict]:
+    # All statuses, newest first. Used to build the chat system-prompt context
+    # so the assistant can answer "list all my tasks" / "what are my recent
+    # tasks" — including ones the user has already completed or cancelled.
+    # (Status is carried on each row, so the model can still tell them apart.)
     return (
         supabase().table("tasks")
         .select("*").eq("user_id", user_id)
-        .in_("status", ["pending", "in_progress"])
-        .order("scheduled_date").order("scheduled_time")
+        .order("created_at", desc=True)
         .limit(limit)
         .execute().data or []
     )
@@ -332,12 +335,14 @@ def list_goals(
     return q.execute().data or []
 
 
-def list_active_goals(user_id: str, limit: int = 25) -> list[dict]:
+def list_recent_goals(user_id: str, limit: int = 30) -> list[dict]:
+    # All statuses, newest first — so the chat context can answer "list all my
+    # goals" / "recent goals" including completed or cancelled ones. Status is
+    # carried on each row so the model can distinguish them.
     return (
         supabase().table("goals")
         .select("*").eq("user_id", user_id)
-        .neq("status", "cancelled")
-        .order("deadline").limit(limit)
+        .order("created_at", desc=True).limit(limit)
         .execute().data or []
     )
 

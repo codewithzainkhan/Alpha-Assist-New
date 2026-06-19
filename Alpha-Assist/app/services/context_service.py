@@ -203,15 +203,19 @@ def persist_history(user_id: str, messages: list[dict], ttl: int = 3600) -> None
 # ───────────────────────────────────────────────────────────────────────────
 def _task_section(user_id: str) -> Optional[str]:
     try:
-        rows = store.list_active_tasks(user_id, limit=25)
+        rows = store.list_recent_tasks(user_id, limit=30)
     except Exception as e:
         logger.warning("[context] task fetch error: %s", e)
         return None
 
     if not rows:
-        return "--- USER TASKS ---\nNo active tasks.\n--- END TASKS ---"
+        return "--- USER TASKS ---\nNo tasks yet.\n--- END TASKS ---"
 
-    lines = ["--- USER TASKS (newest first) ---"]
+    lines = [
+        "--- USER TASKS (all statuses, newest first) ---",
+        "When the user asks to 'list all tasks', include every task below. "
+        "Completed/cancelled tasks are shown via their status= field.",
+    ]
     for r in rows:
         line = (
             f"[{r['id']}] {r.get('task_name','?')} | type={r.get('task_type','?')} | "
@@ -230,7 +234,7 @@ def _task_section(user_id: str) -> Optional[str]:
 
 def _goal_section(user_id: str) -> Optional[str]:
     try:
-        rows = store.list_active_goals(user_id, limit=25)
+        rows = store.list_recent_goals(user_id, limit=30)
     except Exception as e:
         logger.warning("[context] goal fetch error: %s", e)
         return None
@@ -238,7 +242,11 @@ def _goal_section(user_id: str) -> Optional[str]:
     if not rows:
         return "--- USER GOALS ---\nNo goals yet.\n--- END GOALS ---"
 
-    lines = ["--- USER GOALS ---"]
+    lines = [
+        "--- USER GOALS (all statuses, newest first) ---",
+        "When the user asks to 'list all goals', include every goal below. "
+        "Completed/cancelled goals are shown via their status= field.",
+    ]
     for r in rows:
         target = float(r.get("target_amount") or 0)
         current = float(r.get("current_amount") or 0)
