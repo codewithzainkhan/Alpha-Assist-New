@@ -71,7 +71,7 @@ async def image_chat(
         storage_path = ""
 
     try:
-        docs = retrieve_context(description)
+        docs = retrieve_context(description, user_id=user_id)
         rag = "\n".join(docs) if isinstance(docs, list) else ""
     except Exception:
         rag = ""

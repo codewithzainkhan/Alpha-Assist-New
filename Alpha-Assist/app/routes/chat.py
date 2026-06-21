@@ -161,7 +161,7 @@ def _run_chat_pipeline(message: str, user_id: str, mode: str = "text", conversat
 
     # RAG augmentation (best-effort)
     try:
-        docs = retrieve_context(message)
+        docs = retrieve_context(message,user_id=user_id)
         context = "\n".join(docs) if isinstance(docs, list) else ""
         if context:
             messages.append({"role": "system", "content": f"Relevant context:\n{context}"})
@@ -226,7 +226,7 @@ def chat_stream(body: ChatRequest, user_id: str = Depends(get_current_user_id)):
     messages = get_or_init_history(user_id)
 
     try:
-        docs = retrieve_context(body.message)
+        docs = retrieve_context(body.message, user_id=user_id)
         context = "\n".join(docs) if isinstance(docs, list) else ""
         if context:
             messages.append({"role": "system", "content": f"Relevant context:\n{context}"})

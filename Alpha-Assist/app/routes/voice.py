@@ -83,7 +83,7 @@ async def voice_chat(
 
         messages = get_or_init_history(user_id)
         try:
-            docs = retrieve_context(transcript)
+            docs = retrieve_context(transcript,user_id=user_id)
             ctx = "\n".join(docs) if isinstance(docs, list) else ""
             if ctx:
                 messages.append({"role": "system", "content": f"Relevant context:\n{ctx}"})
